@@ -17,8 +17,43 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(
           title: const Text('My Todo'),
+          centerTitle: true,
         ),
-        body: const SizedBox(),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.check_box_outline_blank),
+                    const SizedBox(width: 8),
+                    const Text('Belajar Flutter'),
+                  ]
+                ),
+                Row(
+                  children: [
+                    const Icon(Icons.check_box_outline_blank),
+                    const SizedBox(width: 8),
+                    const Text('Belajar Git'),
+                  ]
+                ),
+                Row(
+                  children: [
+                    const Icon(Icons.check_box_outline_blank),
+                    const SizedBox(width: 8),
+                    const Text('Push ke GitHub'),
+                  ]
+                ),
+              ],
+            )
+          )
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {},
+          child: const Icon(Icons.add),
+        ),
       )
     );
   }
