@@ -14,7 +14,15 @@ class Todo {
   });
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+
+  MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   final List<Todo> todoList = [
     Todo(
       title: 'Belajar Flutter',
@@ -29,8 +37,6 @@ class MyApp extends StatelessWidget {
       isDone: false,
     ),
   ];
-
-  MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -56,10 +62,17 @@ class MyApp extends StatelessWidget {
                       final todo = todoList[index];
                       return ListTile(
                         leading: 
-                          Icon(
-                            todo.isDone 
-                            ? Icons.check_box 
-                            : Icons.check_box_outline_blank),
+                          InkWell(
+                            onTap: () {
+                              setState(() {
+                                todo.isDone = !todo.isDone;
+                              });
+                            },
+                            child: Icon(
+                              todo.isDone 
+                              ? Icons.check_box 
+                              : Icons.check_box_outline_blank),
+                          ),
                         title: Text(todo.title),
                         trailing: const Icon(Icons.delete_outline),
                       );
