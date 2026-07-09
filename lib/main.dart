@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final List<String> todoList = [
+    'Belajar Flutter',
+    'Belajar Git',
+    'Push ke GitHub',
+  ];
+
+  MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,28 +29,20 @@ class MyApp extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    const Icon(Icons.check_box_outline_blank),
-                    const SizedBox(width: 8),
-                    const Text('Belajar Flutter'),
-                  ]
-                ),
-                Row(
-                  children: [
-                    const Icon(Icons.check_box_outline_blank),
-                    const SizedBox(width: 8),
-                    const Text('Belajar Git'),
-                  ]
-                ),
-                Row(
-                  children: [
-                    const Icon(Icons.check_box_outline_blank),
-                    const SizedBox(width: 8),
-                    const Text('Push ke GitHub'),
-                  ]
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: todoList.length,
+                    itemBuilder: (context, index) {
+                      return Row(
+                        children: [
+                          const Icon(Icons.check_box_outline_blank),
+                          const SizedBox(width: 8),
+                          Text(todoList[index])
+                        ]
+                      );
+                    }
+                  ),
                 ),
               ],
             )
