@@ -74,7 +74,14 @@ class _MyAppState extends State<MyApp> {
                               : Icons.check_box_outline_blank),
                           ),
                         title: Text(todo.title),
-                        trailing: const Icon(Icons.delete_outline),
+                        trailing: InkWell(
+                          onTap: () {
+                            setState(() {
+                              todoList.removeAt(index);
+                            });
+                          },
+                          child: const Icon(Icons.delete_outline),
+                        ),
                       );
                     }
                   ),
