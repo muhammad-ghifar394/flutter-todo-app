@@ -36,6 +36,41 @@ class _HomePageState extends State<HomePage> {
   final TextEditingController _textController = TextEditingController();
 
   @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  void _toggleTodo(int index){
+    setState(() {
+      todoList[index].isDone =  !todoList[index].isDone;
+    });
+  }
+
+  void _deleteTodo(int index){
+    setState(() {
+      todoList.removeAt(index);
+    });
+  }
+
+  void _addTodo(){
+    final title = _textController.text.trim();
+    if (title.isEmpty){
+      return;
+    }
+    setState(() {
+      todoList.add(
+        Todo(
+          title: title, 
+          isDone: false
+        )
+      );
+    });
+    _textController.clear();
+    Navigator.of(context).pop();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -55,11 +90,7 @@ class _HomePageState extends State<HomePage> {
                     return ListTile(
                       leading: 
                         InkWell(
-                          onTap: () {
-                            setState(() {
-                              todo.isDone = !todo.isDone;
-                            });
-                          },
+                          onTap: () => _toggleTodo(index),
                           child: Icon(
                             todo.isDone 
                             ? Icons.check_box 
@@ -67,11 +98,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       title: Text(todo.title),
                       trailing: InkWell(
-                        onTap: () {
-                          setState(() {
-                            todoList.removeAt(index);
-                          });
-                        },
+                        onTap: () => _deleteTodo(index),
                         child: const Icon(Icons.delete_outline),
                       ),
                     );
@@ -105,22 +132,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   TextButton(
                     child: const Text('Add'),
-                    onPressed: () {
-                      final title = _textController.text.trim();
-                      if (title.isEmpty){
-                        return;
-                      }
-                      setState(() {
-                        todoList.add(
-                          Todo(
-                            title: title, 
-                            isDone: false
-                          )
-                        );
-                      });
-                      _textController.clear();
-                      Navigator.of(context).pop();
-                    },
+                    onPressed: _addTodo,
                   ),
                 ],
               );
