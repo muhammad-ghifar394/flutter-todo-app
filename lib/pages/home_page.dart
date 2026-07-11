@@ -1,14 +1,6 @@
 import 'package:flutter/material.dart';
-
-class Todo {
-  String title;
-  bool isDone;
-
-  Todo({
-    required this.title, 
-    required this.isDone,
-  });
-}
+import 'package:to_do_app/models/todo.dart';
+import 'package:to_do_app/widgets/todo_tile.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -87,20 +79,10 @@ class _HomePageState extends State<HomePage> {
                   itemCount: todoList.length,
                   itemBuilder: (context, index) {
                     final todo = todoList[index];
-                    return ListTile(
-                      leading: 
-                        InkWell(
-                          onTap: () => _toggleTodo(index),
-                          child: Icon(
-                            todo.isDone 
-                            ? Icons.check_box 
-                            : Icons.check_box_outline_blank),
-                        ),
-                      title: Text(todo.title),
-                      trailing: InkWell(
-                        onTap: () => _deleteTodo(index),
-                        child: const Icon(Icons.delete_outline),
-                      ),
+                    return TodoTile(
+                      todo: todo, 
+                      onToggle: () => _toggleTodo(index), 
+                      onDelete: () => _deleteTodo(index),
                     );
                   }
                 ),
