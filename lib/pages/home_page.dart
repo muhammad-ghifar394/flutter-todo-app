@@ -62,6 +62,49 @@ class _HomePageState extends State<HomePage> {
     Navigator.of(context).pop();
   }
 
+  void _editTodo(int index){
+    final todo = todoList[index];
+
+    _textController.text = todo.title;
+
+    showDialog(
+      context: context, 
+      builder: (context){
+        return AlertDialog(
+          title: Text("Edit todo"),
+          content: TextField(
+            controller: _textController,
+            decoration: InputDecoration(
+              hintText: "Add todo",
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _textController.clear();
+                Navigator.pop(context);
+              }, 
+              child: Text("cancel")
+            ),
+            TextButton(
+              onPressed: (){
+                final title = _textController.text.trim();
+
+                if(title.isEmpty){
+                  return;
+                }
+                setState(() {
+                  todo.title = title;
+                  Navigator.pop(context);
+                });
+              }, 
+              child: Text("Save")
+            )
+          ],
+        );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,6 +126,7 @@ class _HomePageState extends State<HomePage> {
                       todo: todo, 
                       onToggle: () => _toggleTodo(index), 
                       onDelete: () => _deleteTodo(index),
+                      onEdit: () => _editTodo(index),
                     );
                   }
                 ),

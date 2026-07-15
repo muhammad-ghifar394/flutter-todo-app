@@ -5,12 +5,14 @@ class TodoTile extends StatelessWidget{
   final Todo todo;
   final VoidCallback onToggle;
   final VoidCallback onDelete;
+  final VoidCallback onEdit;
   
   const TodoTile({
     super.key,
     required this.todo,
     required this.onToggle,
-    required this.onDelete
+    required this.onDelete,
+    required this.onEdit,
   });
 
   @override
@@ -24,7 +26,10 @@ class TodoTile extends StatelessWidget{
             ? Icons.check_box 
             : Icons.check_box_outline_blank),
         ),
-      title: Text(todo.title),
+      title: InkWell(
+        onTap: onEdit,
+        child: Text(todo.title),
+      ),
       trailing: InkWell(
         onTap: onDelete,
         child: const Icon(Icons.delete_outline),
