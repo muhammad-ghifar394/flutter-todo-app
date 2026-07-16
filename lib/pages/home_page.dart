@@ -96,14 +96,41 @@ class _HomePageState extends State<HomePage> {
                 }
                 setState(() {
                   todo.title = title;
-                  Navigator.pop(context);
                 });
+                Navigator.pop(context);
               }, 
               child: Text("Save")
             )
           ],
         );
     });
+  }
+
+  void _showDeleteDialog(int index){
+    showDialog(
+      context: context, 
+      builder: (context){
+        return AlertDialog(
+          title: const Text("Delete ToDo"),
+          content: Text("Apakah anda yakin ingin menghapus todo ?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              }, 
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: (){
+                Navigator.pop(context);
+                _deleteTodo(index);
+              }, 
+              child: const Text("Delete")
+            )
+          ],
+        );
+      }
+    );
   }
 
   @override
@@ -129,7 +156,7 @@ class _HomePageState extends State<HomePage> {
                     return TodoTile(
                       todo: todo, 
                       onToggle: () => _toggleTodo(index), 
-                      onDelete: () => _deleteTodo(index),
+                      onDelete: () => _showDeleteDialog(index),
                       onEdit: () => _editTodo(index),
                     );
                   }
