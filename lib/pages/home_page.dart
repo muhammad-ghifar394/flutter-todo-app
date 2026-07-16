@@ -118,7 +118,14 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             children: [
               Expanded(
-                child: ListView.builder(
+                child: todoList.isEmpty
+                ? const Center(
+                  child: Text(
+                    'Belum ada todo'
+                  ),
+                )
+                
+                : ListView.builder(
                   itemCount: todoList.length,
                   itemBuilder: (context, index) {
                     final todo = todoList[index];
