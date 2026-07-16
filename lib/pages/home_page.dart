@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:to_do_app/models/todo.dart';
 import 'package:to_do_app/widgets/todo_tile.dart';
+import 'package:to_do_app/widgets/empty_todo.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -119,11 +120,7 @@ class _HomePageState extends State<HomePage> {
             children: [
               Expanded(
                 child: todoList.isEmpty
-                ? const Center(
-                  child: Text(
-                    'Belum ada todo'
-                  ),
-                )
+                ? const EmptyTodo()
                 
                 : ListView.builder(
                   itemCount: todoList.length,
