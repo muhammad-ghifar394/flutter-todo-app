@@ -34,16 +34,40 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  void _toggleTodo(int index){
+  void _toggleTodo(Todo todo){
     setState(() {
-      todoList[index].isDone =  !todoList[index].isDone;
+      todo.isDone =  !todo.isDone;
     });
   }
 
-  void _deleteTodo(int index){
-    setState(() {
-      todoList.removeAt(index);
-    });
+  void _showAddDialog(){
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Add Todo'),
+          content: TextField(
+            controller: _textController,
+            decoration: const InputDecoration(
+              hintText: 'Add Todo',
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                _textController.clear();
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Add Todo'),
+              onPressed: _addTodo,
+            ),
+          ],
+        );
+      }
+    );
   }
 
   void _addTodo(){
@@ -63,20 +87,18 @@ class _HomePageState extends State<HomePage> {
     Navigator.of(context).pop();
   }
 
-  void _editTodo(int index){
-    final todo = todoList[index];
-
+  void _showEditDialog(Todo todo){
     _textController.text = todo.title;
 
     showDialog(
       context: context, 
       builder: (context){
         return AlertDialog(
-          title: Text("Edit todo"),
+          title: const Text("Edit Todo"),
           content: TextField(
             controller: _textController,
-            decoration: InputDecoration(
-              hintText: "Add todo",
+            decoration: const InputDecoration(
+              hintText: "Edit Todo",
             ),
           ),
           actions: [
@@ -85,34 +107,36 @@ class _HomePageState extends State<HomePage> {
                 _textController.clear();
                 Navigator.pop(context);
               }, 
-              child: Text("cancel")
+              child: const Text("Cancel")
             ),
             TextButton(
-              onPressed: (){
-                final title = _textController.text.trim();
-
-                if(title.isEmpty){
-                  return;
-                }
-                setState(() {
-                  todo.title = title;
-                });
-                Navigator.pop(context);
-              }, 
-              child: Text("Save")
+              onPressed:() => _editTodo(todo), 
+              child: const Text("Save")
             )
           ],
         );
     });
   }
 
-  void _showDeleteDialog(int index){
+  void _editTodo(Todo todo){
+    final title = _textController.text.trim();
+    if(title.isEmpty){
+      return;
+    }
+    setState(() {
+      todo.title = title;
+    });
+    _textController.clear();
+    Navigator.pop(context);
+  }
+
+  void _showDeleteDialog(Todo todo){
     showDialog(
       context: context, 
       builder: (context){
         return AlertDialog(
-          title: const Text("Delete ToDo"),
-          content: Text("Apakah anda yakin ingin menghapus todo ?"),
+          title: const Text("Delete Todo"),
+          content: const Text("Apakah Anda yakin ingin menghapus todo ini?"),
           actions: [
             TextButton(
               onPressed: () {
@@ -123,7 +147,7 @@ class _HomePageState extends State<HomePage> {
             TextButton(
               onPressed: (){
                 Navigator.pop(context);
-                _deleteTodo(index);
+                _deleteTodo(todo);
               }, 
               child: const Text("Delete")
             )
@@ -131,6 +155,12 @@ class _HomePageState extends State<HomePage> {
         );
       }
     );
+  }
+
+  void _deleteTodo(Todo todo){
+    setState(() {
+      todoList.remove(todo);
+    });
   }
 
   @override
@@ -155,9 +185,9 @@ class _HomePageState extends State<HomePage> {
                     final todo = todoList[index];
                     return TodoTile(
                       todo: todo, 
-                      onToggle: () => _toggleTodo(index), 
-                      onDelete: () => _showDeleteDialog(index),
-                      onEdit: () => _editTodo(index),
+                      onToggle: () => _toggleTodo(todo), 
+                      onDelete: () => _showDeleteDialog(todo),
+                      onEdit: () => _showEditDialog(todo),
                     );
                   }
                 ),
@@ -167,35 +197,7 @@ class _HomePageState extends State<HomePage> {
         )
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: const Text('add todo'),
-                content: TextField(
-                  controller: _textController,
-                  decoration: const InputDecoration(
-                    hintText: 'add todo',
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    child: const Text('Cancel'),
-                    onPressed: () {
-                      _textController.clear();
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  TextButton(
-                    child: const Text('Add'),
-                    onPressed: _addTodo,
-                  ),
-                ],
-              );
-            }
-          );
-        },
+        onPressed: _showAddDialog,
         child: const Icon(Icons.add),
       ),
     );
