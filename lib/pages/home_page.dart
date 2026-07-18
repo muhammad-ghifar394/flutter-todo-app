@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:to_do_app/models/todo.dart';
 import 'package:to_do_app/widgets/todo_tile.dart';
 import 'package:to_do_app/widgets/empty_todo.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -11,33 +12,20 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<Todo> todoList = [
-    Todo(
-      title: 'Belajar Flutter',
-      isDone: false,
-    ),
-    Todo(
-      title: 'Belajar Git',
-      isDone: false,
-    ),
-    Todo(
-      title: 'Push ke GitHUb',
-      isDone: false,
-    ),
-  ];
+  final List<Todo> todoList = [];
 
   final TextEditingController _textController = TextEditingController();
+
+  @override
+  void initState(){
+    super.initState();
+    _loadTodos();
+  }
 
   @override
   void dispose() {
     _textController.dispose();
     super.dispose();
-  }
-
-  void _toggleTodo(Todo todo){
-    setState(() {
-      todo.isDone =  !todo.isDone;
-    });
   }
 
   void _showAddDialog(){
@@ -68,23 +56,6 @@ class _HomePageState extends State<HomePage> {
         );
       }
     );
-  }
-
-  void _addTodo(){
-    final title = _textController.text.trim();
-    if (title.isEmpty){
-      return;
-    }
-    setState(() {
-      todoList.add(
-        Todo(
-          title: title, 
-          isDone: false
-        )
-      );
-    });
-    _textController.clear();
-    Navigator.of(context).pop();
   }
 
   void _showEditDialog(Todo todo){
@@ -118,18 +89,6 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _editTodo(Todo todo){
-    final title = _textController.text.trim();
-    if(title.isEmpty){
-      return;
-    }
-    setState(() {
-      todo.title = title;
-    });
-    _textController.clear();
-    Navigator.pop(context);
-  }
-
   void _showDeleteDialog(Todo todo){
     showDialog(
       context: context, 
@@ -157,9 +116,75 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void _toggleTodo(Todo todo){
+    setState(() {
+      todo.isDone =  !todo.isDone;
+    });
+
+    _saveTodos();
+  }
+
+  void _addTodo(){
+    final title = _textController.text.trim();
+    if (title.isEmpty){
+      return;
+    }
+    setState(() {
+      todoList.add(
+        Todo.create(
+          title: title,
+        )
+      );
+    });
+    _saveTodos();
+    _textController.clear();
+    Navigator.of(context).pop();
+  }
+
+  void _editTodo(Todo todo){
+    final title = _textController.text.trim();
+    if(title.isEmpty){
+      return;
+    }
+    setState(() {
+      todo.title = title;
+    });
+    _saveTodos();
+    _textController.clear();
+    Navigator.pop(context);
+  }
+
   void _deleteTodo(Todo todo){
     setState(() {
       todoList.remove(todo);
+    });
+    _saveTodos();
+  }
+
+  Future<void> _saveTodos() async{
+    final prefs = await SharedPreferences.getInstance();
+
+    final jsonList = todoList.map((todo)=> todo.toJson()).toList();
+
+    await prefs.setStringList("todos",jsonList);
+  }
+
+  Future<void> _loadTodos() async{
+    final prefs = await SharedPreferences.getInstance();
+
+    final jsonList = prefs.getStringList("todos");
+
+    if(jsonList == null){
+      return;
+    }
+
+    final todos = jsonList
+    .map((json)=>Todo.fromJson(json))
+    .toList();
+
+    setState((){
+      todoList.clear();
+      todoList.addAll(todos);
     });
   }
 
