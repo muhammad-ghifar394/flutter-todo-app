@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:to_do_app/models/todo.dart';
 import 'package:to_do_app/widgets/todo_tile.dart';
 import 'package:to_do_app/widgets/empty_todo.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:to_do_app/services/todo_storage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,6 +15,8 @@ class _HomePageState extends State<HomePage> {
   final List<Todo> todoList = [];
 
   final TextEditingController _textController = TextEditingController();
+
+  final TodoStorage _storage = TodoStorage();
 
   @override
   void initState(){
@@ -116,15 +118,15 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _toggleTodo(Todo todo){
+  void _toggleTodo(Todo todo) async{
     setState(() {
       todo.isDone =  !todo.isDone;
     });
 
-    _saveTodos();
+    await _storage.saveTodos(todoList);
   }
 
-  void _addTodo(){
+  void _addTodo() async{
     final title = _textController.text.trim();
     if (title.isEmpty){
       return;
@@ -136,12 +138,12 @@ class _HomePageState extends State<HomePage> {
         )
       );
     });
-    _saveTodos();
+    await _storage.saveTodos(todoList);
     _textController.clear();
     Navigator.of(context).pop();
   }
 
-  void _editTodo(Todo todo){
+  void _editTodo(Todo todo) async{
     final title = _textController.text.trim();
     if(title.isEmpty){
       return;
@@ -149,38 +151,20 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       todo.title = title;
     });
-    _saveTodos();
+    await _storage.saveTodos(todoList);
     _textController.clear();
     Navigator.pop(context);
   }
 
-  void _deleteTodo(Todo todo){
+  void _deleteTodo(Todo todo)async{
     setState(() {
       todoList.remove(todo);
     });
-    _saveTodos();
+    await _storage.saveTodos(todoList);
   }
 
-  Future<void> _saveTodos() async{
-    final prefs = await SharedPreferences.getInstance();
-
-    final jsonList = todoList.map((todo)=> todo.toJson()).toList();
-
-    await prefs.setStringList("todos",jsonList);
-  }
-
-  Future<void> _loadTodos() async{
-    final prefs = await SharedPreferences.getInstance();
-
-    final jsonList = prefs.getStringList("todos");
-
-    if(jsonList == null){
-      return;
-    }
-
-    final todos = jsonList
-    .map((json)=>Todo.fromJson(json))
-    .toList();
+  Future<void> _loadTodos() async {
+    final todos = await _storage.loadTodos();
 
     setState((){
       todoList.clear();
