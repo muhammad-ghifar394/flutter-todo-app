@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:to_do_app/models/todo.dart';
+import 'package:to_do_app/pages/about_page.dart';
+import 'package:to_do_app/pages/tododetail_page.dart';
 import 'package:to_do_app/widgets/todo_tile.dart';
 import 'package:to_do_app/widgets/empty_todo.dart';
 import 'package:to_do_app/services/todo_storage.dart';
@@ -178,6 +180,18 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('My Todo'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context, 
+                MaterialPageRoute(
+                  builder: (context) => const AboutPage(),
+                )
+              );
+            },
+            icon: Icon(Icons.info))
+        ]
       ),
       body: SafeArea(
         child: Padding(
@@ -187,7 +201,6 @@ class _HomePageState extends State<HomePage> {
               Expanded(
                 child: todoList.isEmpty
                 ? const EmptyTodo()
-                
                 : ListView.builder(
                   itemCount: todoList.length,
                   itemBuilder: (context, index) {
@@ -197,6 +210,14 @@ class _HomePageState extends State<HomePage> {
                       onToggle: () => _toggleTodo(todo), 
                       onDelete: () => _showDeleteDialog(todo),
                       onEdit: () => _showEditDialog(todo),
+                      onDetail: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TodoDetailPage(todo: todo)
+                          )
+                        );
+                      },
                     );
                   }
                 ),
