@@ -16,7 +16,11 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final List<Todo> todoList = [];
 
-  final TextEditingController _textController = TextEditingController();
+  final List<Todo> filteredTodos = [];
+
+  final TextEditingController _addController = TextEditingController();
+
+  final TextEditingController _searchController = TextEditingController();
 
   final TodoStorage _storage = TodoStorage();
 
@@ -28,7 +32,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
-    _textController.dispose();
+    _searchController.dispose();
+    _addController.dispose();
     super.dispose();
   }
 
@@ -39,7 +44,7 @@ class _HomePageState extends State<HomePage> {
         return AlertDialog(
           title: const Text('Add Todo'),
           content: TextField(
-            controller: _textController,
+            controller: _addController,
             decoration: const InputDecoration(
               hintText: 'Add Todo',
             ),
@@ -48,7 +53,7 @@ class _HomePageState extends State<HomePage> {
             TextButton(
               child: const Text('Cancel'),
               onPressed: () {
-                _textController.clear();
+                _addController.clear();
                 Navigator.of(context).pop();
               },
             ),
@@ -63,7 +68,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _showEditDialog(Todo todo){
-    _textController.text = todo.title;
+    _addController.text = todo.title;
 
     showDialog(
       context: context, 
@@ -71,7 +76,7 @@ class _HomePageState extends State<HomePage> {
         return AlertDialog(
           title: const Text("Edit Todo"),
           content: TextField(
-            controller: _textController,
+            controller: _addController,
             decoration: const InputDecoration(
               hintText: "Edit Todo",
             ),
@@ -79,7 +84,7 @@ class _HomePageState extends State<HomePage> {
           actions: [
             TextButton(
               onPressed: () {
-                _textController.clear();
+                _addController.clear();
                 Navigator.pop(context);
               }, 
               child: const Text("Cancel")
@@ -129,7 +134,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _addTodo() async{
-    final title = _textController.text.trim();
+    final title = _addController.text.trim();
     if (title.isEmpty){
       return;
     }
@@ -141,12 +146,13 @@ class _HomePageState extends State<HomePage> {
       );
     });
     await _storage.saveTodos(todoList);
-    _textController.clear();
+    _searchTodo(_searchController.text);
+    _addController.clear();
     Navigator.of(context).pop();
   }
 
   void _editTodo(Todo todo) async{
-    final title = _textController.text.trim();
+    final title = _addController.text.trim();
     if(title.isEmpty){
       return;
     }
@@ -154,7 +160,8 @@ class _HomePageState extends State<HomePage> {
       todo.title = title;
     });
     await _storage.saveTodos(todoList);
-    _textController.clear();
+    _searchTodo(_searchController.text);
+    _addController.clear();
     Navigator.pop(context);
   }
 
@@ -163,6 +170,7 @@ class _HomePageState extends State<HomePage> {
       todoList.remove(todo);
     });
     await _storage.saveTodos(todoList);
+    _searchTodo(_searchController.text);
   }
 
   Future<void> _loadTodos() async {
@@ -171,6 +179,22 @@ class _HomePageState extends State<HomePage> {
     setState((){
       todoList.clear();
       todoList.addAll(todos);
+
+      filteredTodos.clear();
+      filteredTodos.addAll(todoList);
+    });
+  }
+
+  void _searchTodo(String keyword){
+    final hasil = todoList.where((todo) {
+      return todo.title.toLowerCase().contains(
+      keyword.toLowerCase()
+      );
+    }).toList();
+
+    setState(() {
+      filteredTodos.clear();
+      filteredTodos.addAll(hasil);
     });
   }
 
@@ -178,6 +202,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.amber,
         title: const Text('My Todo'),
         centerTitle: true,
         actions: [
@@ -198,29 +223,54 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
+              TextField(
+                onChanged: (value) {
+                  _searchTodo(value);
+                },
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: "Search Todo...",
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 16,),
               Expanded(
                 child: todoList.isEmpty
-                ? const EmptyTodo()
-                : ListView.builder(
-                  itemCount: todoList.length,
-                  itemBuilder: (context, index) {
-                    final todo = todoList[index];
-                    return TodoTile(
-                      todo: todo, 
-                      onToggle: () => _toggleTodo(todo), 
-                      onDelete: () => _showDeleteDialog(todo),
-                      onEdit: () => _showEditDialog(todo),
-                      onDetail: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => TodoDetailPage(todo: todo)
-                          )
-                        );
-                      },
-                    );
-                  }
-                ),
+                ? EmptyState(
+                      icon: Icons.inbox, 
+                      title: "No Todo", 
+                      subtitle: "Make a new todo in + icon")
+                : filteredTodos.isEmpty
+                  ? EmptyState(
+                      icon: Icons.search, 
+                      title: "No Todo Found", 
+                      subtitle: "Try another keyword")
+                  : ListView.builder(
+                    itemCount: filteredTodos.length,
+                    itemBuilder: (context, index) {
+                      final todo = filteredTodos[index];
+                      return Card(
+                        margin: EdgeInsets.symmetric(
+                          vertical: 4,
+                        ),
+                        child: TodoTile(
+                          todo: todo, 
+                          onToggle: () => _toggleTodo(todo), 
+                          onDelete: () => _showDeleteDialog(todo),
+                          onEdit: () => _showEditDialog(todo),
+                          onDetail: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TodoDetailPage(todo: todo)
+                              )
+                            );
+                          },
+                        ),
+                      );
+                    }
+                  ),
               ),
             ],
           )

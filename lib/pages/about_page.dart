@@ -7,7 +7,8 @@ class AboutPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("My Todo")
+        backgroundColor: Colors.amber,
+        title: const Text("My Todo App")
       ),
       body: SafeArea(
         child: Center(

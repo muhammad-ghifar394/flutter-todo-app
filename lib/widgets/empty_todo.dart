@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 
-class EmptyTodo extends StatelessWidget {
-  const EmptyTodo({super.key});
+class EmptyState extends StatelessWidget {
+  const EmptyState({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -9,10 +18,10 @@ class EmptyTodo extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.inbox),
-          SizedBox(height: 16),
-          Text("Tidak ada todo"),
-          Text("Buat to do pada tombol +"),
+          Icon(icon),
+          const SizedBox(height: 16),
+          Text(title),
+          Text(subtitle),
         ],
       ),
     );

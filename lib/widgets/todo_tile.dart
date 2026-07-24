@@ -20,6 +20,7 @@ class TodoTile extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      tileColor: Colors.amber.withValues(alpha: 0.5),
       leading: 
         InkWell(
           onTap: onToggle,
