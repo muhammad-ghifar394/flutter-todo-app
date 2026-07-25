@@ -13,6 +13,12 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
+enum TodoFilter{
+  all,
+  active,
+  completed,
+}
+
 class _HomePageState extends State<HomePage> {
   final List<Todo> todoList = [];
 
@@ -23,6 +29,8 @@ class _HomePageState extends State<HomePage> {
   final TextEditingController _searchController = TextEditingController();
 
   final TodoStorage _storage = TodoStorage();
+
+  TodoFilter currentFilter = TodoFilter.all;
 
   @override
   void initState(){
@@ -146,7 +154,7 @@ class _HomePageState extends State<HomePage> {
       );
     });
     await _storage.saveTodos(todoList);
-    _searchTodo(_searchController.text);
+    _applyFilters();
     _addController.clear();
     Navigator.of(context).pop();
   }
@@ -160,7 +168,7 @@ class _HomePageState extends State<HomePage> {
       todo.title = title;
     });
     await _storage.saveTodos(todoList);
-    _searchTodo(_searchController.text);
+    _applyFilters();
     _addController.clear();
     Navigator.pop(context);
   }
@@ -170,7 +178,7 @@ class _HomePageState extends State<HomePage> {
       todoList.remove(todo);
     });
     await _storage.saveTodos(todoList);
-    _searchTodo(_searchController.text);
+    _applyFilters();
   }
 
   Future<void> _loadTodos() async {
@@ -185,11 +193,29 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _searchTodo(String keyword){
+  void _applyFilters(){
+    final String keyword = _searchController.text.trim().toLowerCase();
+
     final hasil = todoList.where((todo) {
-      return todo.title.toLowerCase().contains(
-      keyword.toLowerCase()
-      );
+      final matchKeyword = todo.title.toLowerCase().contains(keyword);
+
+    bool matchFilter;
+
+    switch(currentFilter){
+      case TodoFilter.all:
+        matchFilter = true;
+        break;
+      
+      case TodoFilter.active:
+        matchFilter = !todo.isDone;
+        break;
+
+      case TodoFilter.completed:
+        matchFilter = todo.isDone;
+        break;
+    }
+
+    return matchFilter && matchKeyword;
     }).toList();
 
     setState(() {
@@ -225,7 +251,7 @@ class _HomePageState extends State<HomePage> {
             children: [
               TextField(
                 onChanged: (value) {
-                  _searchTodo(value);
+                  _applyFilters();
                 },
                 controller: _searchController,
                 decoration: InputDecoration(
