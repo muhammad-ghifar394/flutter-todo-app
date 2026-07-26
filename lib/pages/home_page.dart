@@ -2,21 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:to_do_app/models/todo.dart';
 import 'package:to_do_app/pages/about_page.dart';
 import 'package:to_do_app/pages/tododetail_page.dart';
+import 'package:to_do_app/widgets/todo_filter_bar.dart';
 import 'package:to_do_app/widgets/todo_tile.dart';
 import 'package:to_do_app/widgets/empty_todo.dart';
 import 'package:to_do_app/services/todo_storage.dart';
+import 'package:to_do_app/models/todo_filter.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
-}
-
-enum TodoFilter{
-  all,
-  active,
-  completed,
 }
 
 class _HomePageState extends State<HomePage> {
@@ -139,6 +135,7 @@ class _HomePageState extends State<HomePage> {
     });
 
     await _storage.saveTodos(todoList);
+    _applyFilters();
   }
 
   void _addTodo() async{
@@ -187,10 +184,9 @@ class _HomePageState extends State<HomePage> {
     setState((){
       todoList.clear();
       todoList.addAll(todos);
-
-      filteredTodos.clear();
-      filteredTodos.addAll(todoList);
     });
+
+    _applyFilters();
   }
 
   void _applyFilters(){
@@ -260,6 +256,15 @@ class _HomePageState extends State<HomePage> {
                   border: OutlineInputBorder(),
                 ),
               ),
+              SizedBox(height: 16,),
+              TodoFilterBar(
+                currentFilter: currentFilter, 
+                onFilterChanged: (filter){
+                  setState(() {
+                    currentFilter = filter; 
+                  });
+                  _applyFilters();
+                }),
               SizedBox(height: 16,),
               Expanded(
                 child: todoList.isEmpty
