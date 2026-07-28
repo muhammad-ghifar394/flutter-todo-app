@@ -18,7 +18,7 @@ class TodoDetailPage extends StatelessWidget {
       ),
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
               ListTile(
@@ -33,6 +33,10 @@ class TodoDetailPage extends StatelessWidget {
                   : "Belum Selesai" 
                 ),
               ),
+              ListTile(
+                title: const Text("Waktu dibuat"),
+                subtitle: Text(todo.createdAt.toString()),
+              )
             ],
           ),
         )

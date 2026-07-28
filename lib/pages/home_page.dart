@@ -3,10 +3,12 @@ import 'package:to_do_app/models/todo.dart';
 import 'package:to_do_app/pages/about_page.dart';
 import 'package:to_do_app/pages/tododetail_page.dart';
 import 'package:to_do_app/widgets/todo_filter_bar.dart';
+import 'package:to_do_app/widgets/todo_sort_bar.dart';
 import 'package:to_do_app/widgets/todo_tile.dart';
 import 'package:to_do_app/widgets/empty_todo.dart';
 import 'package:to_do_app/services/todo_storage.dart';
 import 'package:to_do_app/models/todo_filter.dart';
+import 'package:to_do_app/models/todo_sort.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -27,6 +29,8 @@ class _HomePageState extends State<HomePage> {
   final TodoStorage _storage = TodoStorage();
 
   TodoFilter currentFilter = TodoFilter.all;
+
+  TodoSort currentSort = TodoSort.newest;
 
   @override
   void initState(){
@@ -214,6 +218,25 @@ class _HomePageState extends State<HomePage> {
     return matchFilter && matchKeyword;
     }).toList();
 
+    switch(currentSort) {
+      case TodoSort.newest:
+        hasil.sort((a,b) => b.createdAt.compareTo(a.createdAt));
+        break;
+
+      case TodoSort.oldest:
+        hasil.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        break;
+
+      case TodoSort.az:
+        hasil.sort((a, b) => a.title.compareTo(b.title));
+        break;
+
+      case TodoSort.za:
+        hasil.sort((a, b) => b.title.compareTo(a.title));
+        break;
+
+    }
+
     setState(() {
       filteredTodos.clear();
       filteredTodos.addAll(hasil);
@@ -256,7 +279,7 @@ class _HomePageState extends State<HomePage> {
                   border: OutlineInputBorder(),
                 ),
               ),
-              SizedBox(height: 16,),
+              const SizedBox(height: 16,),
               TodoFilterBar(
                 currentFilter: currentFilter, 
                 onFilterChanged: (filter){
@@ -265,7 +288,16 @@ class _HomePageState extends State<HomePage> {
                   });
                   _applyFilters();
                 }),
-              SizedBox(height: 16,),
+              const SizedBox(height: 16,),
+              TodoSortBar(
+                currentSort: currentSort, 
+                onSortChanged: (sort){
+                  setState(() {
+                    currentSort = sort; 
+                  });
+                  _applyFilters();
+                }),
+              const SizedBox(height: 16,),
               Expanded(
                 child: todoList.isEmpty
                 ? EmptyState(
