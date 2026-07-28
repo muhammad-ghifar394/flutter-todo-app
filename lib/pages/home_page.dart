@@ -9,6 +9,7 @@ import 'package:to_do_app/widgets/empty_todo.dart';
 import 'package:to_do_app/services/todo_storage.dart';
 import 'package:to_do_app/models/todo_filter.dart';
 import 'package:to_do_app/models/todo_sort.dart';
+import 'package:to_do_app/widgets/todo_stats_card.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -31,6 +32,14 @@ class _HomePageState extends State<HomePage> {
   TodoFilter currentFilter = TodoFilter.all;
 
   TodoSort currentSort = TodoSort.newest;
+
+  int get totalTodos => todoList.length;
+
+  int get completedTodos =>
+      todoList.where((todo) => todo.isDone).length;
+
+  int get activeTodos =>
+      totalTodos - completedTodos;
 
   @override
   void initState(){
@@ -268,6 +277,12 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
+              TodoStatsCard(
+                total: totalTodos,
+                active: activeTodos,
+                completed: completedTodos,
+              ),
+              const SizedBox(height: 16),
               TextField(
                 onChanged: (value) {
                   _applyFilters();
