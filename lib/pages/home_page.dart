@@ -255,51 +255,55 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.amber,
-        title: const Text('My Todo'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context, 
-                MaterialPageRoute(
-                  builder: (context) => const AboutPage(),
-                )
-              );
-            },
-            icon: Icon(Icons.info))
-        ]
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: TodoStatsCard(
-                  total: totalTodos,
-                  active: activeTodos,
-                  completed: completedTodos,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            backgroundColor: Colors.amber,
+            title: const Text("My Todo"),
+            centerTitle: true,
+            actions: [
+              IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AboutPage(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.info),
+              ),
+            ],
+          ),
+          SliverPadding(
+            padding: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 8),
+            sliver: SliverToBoxAdapter(
+              child: TodoStatsCard(
+                total: totalTodos,
+                active: activeTodos,
+                completed: completedTodos,
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 8),
+            sliver: SliverToBoxAdapter(
+              child: TextField(
+                onChanged: (value) {
+                  _applyFilters();
+                },
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  hintText: "Search Todo...",
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(),
                 ),
               ),
-              SliverToBoxAdapter(child: const SizedBox(height: 16)),
-              SliverToBoxAdapter(
-                child: TextField(
-                  onChanged: (value) {
-                    _applyFilters();
-                  },
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: "Search Todo...",
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(child: const SizedBox(height: 16,)),
-              SliverToBoxAdapter(
+            ),
+          ),
+          SliverPadding(
+            padding: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 8),
+            sliver: SliverToBoxAdapter(
                 child: TodoFilterBar(
                   currentFilter: currentFilter, 
                   onFilterChanged: (filter){
@@ -309,64 +313,68 @@ class _HomePageState extends State<HomePage> {
                     _applyFilters();
                   }),
               ),
-              SliverToBoxAdapter(child: const SizedBox(height: 16,)),
-              SliverToBoxAdapter(
-                child: TodoSortBar(
-                  currentSort: currentSort, 
-                  onSortChanged: (sort){
-                    setState(() {
-                      currentSort = sort; 
-                    });
-                    _applyFilters();
-                  }),
+          ),
+          SliverPadding(
+            padding: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 8),
+            sliver: SliverToBoxAdapter(
+              child: TodoSortBar(
+                currentSort: currentSort, 
+                onSortChanged: (sort){
+                  setState(() {
+                    currentSort = sort; 
+                  });
+                  _applyFilters();
+                }
               ),
-              SliverToBoxAdapter(child: const SizedBox(height: 16,)),
-              todoList.isEmpty
-                ? SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: EmptyState(
-                    icon: Icons.inbox, 
-                    title: "No Todo", 
-                    subtitle: "Make a new todo in + icon"),
-                )
-                : filteredTodos.isEmpty
-                  ? SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: EmptyState(
-                      icon: Icons.search, 
-                      title: "No Todo Found", 
-                      subtitle: "Try another keyword"),
-                  )
-                  : SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context,index){
-                        final todo = filteredTodos[index];
-                        return Card(
-                          margin:const EdgeInsets.symmetric(
-                            vertical: 4,
-                          ),
-                          child: TodoTile(
-                            todo: todo, 
-                            onToggle: () => _toggleTodo(todo), 
-                            onDelete: () => _showDeleteDialog(todo),
-                            onEdit: () => _showEditDialog(todo),
-                            onDetail: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => TodoDetailPage(todo: todo)
-                                )
-                              );
-                            },
-                          ),
-                        );
-                      },
-                      childCount: filteredTodos.length,
-                    ),
+            )
+          ),
+          todoList.isEmpty
+            ? SliverFillRemaining(
+              hasScrollBody: false,
+              child: EmptyState(
+                icon: Icons.inbox, 
+                title: "No Todo", 
+                subtitle: "Make a new todo in + icon"),
+            )
+            : filteredTodos.isEmpty
+              ? SliverFillRemaining(
+                hasScrollBody: false,
+                child: EmptyState(
+                  icon: Icons.search, 
+                  title: "No Todo Found", 
+                  subtitle: "Try another keyword"),
+              )
+              : SliverPadding(
+                padding: const EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 8),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context,index){
+                      final todo = filteredTodos[index];
+                      return Card(
+                        margin:const EdgeInsets.symmetric(
+                          vertical: 4,
+                        ),
+                        child: TodoTile(
+                          todo: todo, 
+                          onToggle: () => _toggleTodo(todo), 
+                          onDelete: () => _showDeleteDialog(todo),
+                          onEdit: () => _showEditDialog(todo),
+                          onDetail: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TodoDetailPage(todo: todo)
+                              )
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    childCount: filteredTodos.length,
                   ),
-            ],
-          )
-        )
+                ),
+              ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddDialog,
