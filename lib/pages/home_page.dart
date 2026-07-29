@@ -275,81 +275,95 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              TodoStatsCard(
-                total: totalTodos,
-                active: activeTodos,
-                completed: completedTodos,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                onChanged: (value) {
-                  _applyFilters();
-                },
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: "Search Todo...",
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(),
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: TodoStatsCard(
+                  total: totalTodos,
+                  active: activeTodos,
+                  completed: completedTodos,
                 ),
               ),
-              const SizedBox(height: 16,),
-              TodoFilterBar(
-                currentFilter: currentFilter, 
-                onFilterChanged: (filter){
-                  setState(() {
-                    currentFilter = filter; 
-                  });
-                  _applyFilters();
-                }),
-              const SizedBox(height: 16,),
-              TodoSortBar(
-                currentSort: currentSort, 
-                onSortChanged: (sort){
-                  setState(() {
-                    currentSort = sort; 
-                  });
-                  _applyFilters();
-                }),
-              const SizedBox(height: 16,),
-              Expanded(
-                child: todoList.isEmpty
-                ? EmptyState(
-                      icon: Icons.inbox, 
-                      title: "No Todo", 
-                      subtitle: "Make a new todo in + icon")
+              SliverToBoxAdapter(child: const SizedBox(height: 16)),
+              SliverToBoxAdapter(
+                child: TextField(
+                  onChanged: (value) {
+                    _applyFilters();
+                  },
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: "Search Todo...",
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(child: const SizedBox(height: 16,)),
+              SliverToBoxAdapter(
+                child: TodoFilterBar(
+                  currentFilter: currentFilter, 
+                  onFilterChanged: (filter){
+                    setState(() {
+                      currentFilter = filter; 
+                    });
+                    _applyFilters();
+                  }),
+              ),
+              SliverToBoxAdapter(child: const SizedBox(height: 16,)),
+              SliverToBoxAdapter(
+                child: TodoSortBar(
+                  currentSort: currentSort, 
+                  onSortChanged: (sort){
+                    setState(() {
+                      currentSort = sort; 
+                    });
+                    _applyFilters();
+                  }),
+              ),
+              SliverToBoxAdapter(child: const SizedBox(height: 16,)),
+              todoList.isEmpty
+                ? SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: EmptyState(
+                    icon: Icons.inbox, 
+                    title: "No Todo", 
+                    subtitle: "Make a new todo in + icon"),
+                )
                 : filteredTodos.isEmpty
-                  ? EmptyState(
+                  ? SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: EmptyState(
                       icon: Icons.search, 
                       title: "No Todo Found", 
-                      subtitle: "Try another keyword")
-                  : ListView.builder(
-                    itemCount: filteredTodos.length,
-                    itemBuilder: (context, index) {
-                      final todo = filteredTodos[index];
-                      return Card(
-                        margin: EdgeInsets.symmetric(
-                          vertical: 4,
-                        ),
-                        child: TodoTile(
-                          todo: todo, 
-                          onToggle: () => _toggleTodo(todo), 
-                          onDelete: () => _showDeleteDialog(todo),
-                          onEdit: () => _showEditDialog(todo),
-                          onDetail: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => TodoDetailPage(todo: todo)
-                              )
-                            );
-                          },
-                        ),
-                      );
-                    }
+                      subtitle: "Try another keyword"),
+                  )
+                  : SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context,index){
+                        final todo = filteredTodos[index];
+                        return Card(
+                          margin:const EdgeInsets.symmetric(
+                            vertical: 4,
+                          ),
+                          child: TodoTile(
+                            todo: todo, 
+                            onToggle: () => _toggleTodo(todo), 
+                            onDelete: () => _showDeleteDialog(todo),
+                            onEdit: () => _showEditDialog(todo),
+                            onDetail: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => TodoDetailPage(todo: todo)
+                                )
+                              );
+                            },
+                          ),
+                        );
+                      },
+                      childCount: filteredTodos.length,
+                    ),
                   ),
-              ),
             ],
           )
         )
