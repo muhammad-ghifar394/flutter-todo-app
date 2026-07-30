@@ -54,65 +54,134 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  void _showAddDialog(){
-    showDialog(
+  void _showAddBottomSheet(){
+    showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('Add Todo'),
-          content: TextField(
-            controller: _addController,
-            decoration: const InputDecoration(
-              hintText: 'Add Todo',
-            ),
+        return Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Add Todo',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 16,),
+
+                TextField(
+                  controller: _addController,
+                  decoration: const InputDecoration(
+                    hintText: "Add Todo",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+
+                const SizedBox(height: 16,),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          _addController.clear();
+                          Navigator.pop(context);
+                        }, 
+                        child: const Text("Cancel")
+                      )
+                    ),
+                    SizedBox(width: 16),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          _addTodo();
+                        }, 
+                        child: const Text("Add")
+                      )
+                    ),
+
+                    const SizedBox(height: 16,)
+                  ],
+                )
+              ],
+            )
           ),
-          actions: [
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                _addController.clear();
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Add Todo'),
-              onPressed: _addTodo,
-            ),
-          ],
         );
       }
     );
   }
 
-  void _showEditDialog(Todo todo){
+  void _showEditBottomSheet(Todo todo) {
     _addController.text = todo.title;
 
-    showDialog(
-      context: context, 
-      builder: (context){
-        return AlertDialog(
-          title: const Text("Edit Todo"),
-          content: TextField(
-            controller: _addController,
-            decoration: const InputDecoration(
-              hintText: "Edit Todo",
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  "Edit Todo",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                TextField(
+                  controller: _addController,
+                  decoration: const InputDecoration(
+                    hintText: "Edit Todo",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          _addController.clear();
+                          Navigator.pop(context);
+                        },
+                        child: const Text("Cancel"),
+                      ),
+                    ),
+
+                    const SizedBox(width: 12),
+
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () => _editTodo(todo),
+                        child: const Text("Save"),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                _addController.clear();
-                Navigator.pop(context);
-              }, 
-              child: const Text("Cancel")
-            ),
-            TextButton(
-              onPressed:() => _editTodo(todo), 
-              child: const Text("Save")
-            )
-          ],
         );
-    });
+      },
+    );
   }
 
   void _showDeleteDialog(Todo todo){
@@ -258,6 +327,7 @@ class _HomePageState extends State<HomePage> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
+            pinned: true,
             backgroundColor: Colors.amber,
             title: const Text("My Todo"),
             centerTitle: true,
@@ -358,7 +428,7 @@ class _HomePageState extends State<HomePage> {
                           todo: todo, 
                           onToggle: () => _toggleTodo(todo), 
                           onDelete: () => _showDeleteDialog(todo),
-                          onEdit: () => _showEditDialog(todo),
+                          onEdit: () => _showEditBottomSheet(todo),
                           onDetail: () {
                             Navigator.push(
                               context,
@@ -377,7 +447,7 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _showAddDialog,
+        onPressed: _showAddBottomSheet,
         child: const Icon(Icons.add),
       ),
     );
