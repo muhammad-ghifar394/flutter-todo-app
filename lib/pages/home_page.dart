@@ -233,6 +233,13 @@ class _HomePageState extends State<HomePage> {
       );
     });
     await _storage.saveTodos(todoList);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Todo berhasil ditambahkan"),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
     _applyFilters();
     _addController.clear();
     Navigator.of(context).pop();
@@ -247,16 +254,42 @@ class _HomePageState extends State<HomePage> {
       todo.title = title;
     });
     await _storage.saveTodos(todoList);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Todo berhasil diubah"),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
     _applyFilters();
     _addController.clear();
     Navigator.pop(context);
   }
 
   void _deleteTodo(Todo todo)async{
+    final deletedTodo = todo;
+    final deletedIndex = todoList.indexOf(todo);
     setState(() {
       todoList.remove(todo);
     });
     await _storage.saveTodos(todoList);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text("Todo berhasil dihapus"),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+        action: SnackBarAction(
+          label: "UNDO", 
+          onPressed: () async {
+            setState(() {
+              todoList.insert(deletedIndex, deletedTodo);
+            });
+            await _storage.saveTodos(todoList);
+            _applyFilters();
+          }
+        )
+      ),
+    );
     _applyFilters();
   }
 
