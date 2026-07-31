@@ -41,6 +41,8 @@ class _HomePageState extends State<HomePage> {
   int get activeTodos =>
       totalTodos - completedTodos;
 
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   @override
   void initState(){
     super.initState();
@@ -63,54 +65,66 @@ class _HomePageState extends State<HomePage> {
           padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Add Todo',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 16,),
-
-                TextField(
-                  controller: _addController,
-                  decoration: const InputDecoration(
-                    hintText: "Add Todo",
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-
-                const SizedBox(height: 16,),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          _addController.clear();
-                          Navigator.pop(context);
-                        }, 
-                        child: const Text("Cancel")
-                      )
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Add Todo',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          _addTodo();
-                        }, 
-                        child: const Text("Add")
-                      )
-                    ),
+                  ),
+              
+                  const SizedBox(height: 16,),
+              
+                  TextFormField(
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Title tidak boleh kosong";
+                      }
 
-                    const SizedBox(height: 16,)
-                  ],
-                )
-              ],
+                      return null;
+                    },
+                    controller: _addController,
+                    decoration: const InputDecoration(
+                      hintText: "Add Todo",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+              
+                  const SizedBox(height: 16,),
+              
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            _addController.clear();
+                            Navigator.pop(context);
+                          }, 
+                          child: const Text("Cancel")
+                        )
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            if(_formKey.currentState!.validate()) { 
+                              _addTodo();
+                            }
+                          }, 
+                          child: const Text("Add")
+                        )
+                      ),
+              
+                      const SizedBox(width: 16,)
+                    ],
+                  )
+                ],
+              ),
             )
           ),
         );
@@ -131,52 +145,62 @@ class _HomePageState extends State<HomePage> {
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  "Edit Todo",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                TextField(
-                  controller: _addController,
-                  decoration: const InputDecoration(
-                    hintText: "Edit Todo",
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          _addController.clear();
-                          Navigator.pop(context);
-                        },
-                        child: const Text("Cancel"),
-                      ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    "Edit Todo",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
+                  ),
+              
+                  const SizedBox(height: 16),
+              
+                  TextFormField(
+                    validator: (value) {
+                      if(value == null || value.trim().isEmpty) {
+                        return "Tidak boleh kosong";
+                      }
 
-                    const SizedBox(width: 12),
-
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: () => _editTodo(todo),
-                        child: const Text("Save"),
-                      ),
+                      return null;
+                    },
+                    controller: _addController,
+                    decoration: const InputDecoration(
+                      hintText: "Edit Todo",
+                      border: OutlineInputBorder(),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+              
+                  const SizedBox(height: 16),
+              
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            _addController.clear();
+                            Navigator.pop(context);
+                          },
+                          child: const Text("Cancel"),
+                        ),
+                      ),
+              
+                      const SizedBox(width: 12),
+              
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: () => _editTodo(todo),
+                          child: const Text("Save"),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -222,9 +246,7 @@ class _HomePageState extends State<HomePage> {
 
   void _addTodo() async{
     final title = _addController.text.trim();
-    if (title.isEmpty){
-      return;
-    }
+    
     setState(() {
       todoList.add(
         Todo.create(
