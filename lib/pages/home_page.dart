@@ -56,84 +56,14 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  void _showAddBottomSheet(){
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Add Todo',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-              
-                  const SizedBox(height: 16,),
-              
-                  TextFormField(
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return "Title tidak boleh kosong";
-                      }
+  void _showTodoBottomSheet({Todo? todo}) {
+    final bool isEdit = todo != null;
 
-                      return null;
-                    },
-                    controller: _addController,
-                    decoration: const InputDecoration(
-                      hintText: "Add Todo",
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-              
-                  const SizedBox(height: 16,),
-              
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {
-                            _addController.clear();
-                            Navigator.pop(context);
-                          }, 
-                          child: const Text("Cancel")
-                        )
-                      ),
-                      SizedBox(width: 16),
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {
-                            if(_formKey.currentState!.validate()) { 
-                              _addTodo();
-                            }
-                          }, 
-                          child: const Text("Add")
-                        )
-                      ),
-              
-                      const SizedBox(width: 16,)
-                    ],
-                  )
-                ],
-              ),
-            )
-          ),
-        );
-      }
-    );
-  }
-
-  void _showEditBottomSheet(Todo todo) {
-    _addController.text = todo.title;
+    if (todo != null) {
+      _addController.text = todo.title;
+    } else {
+      _addController.clear();
+    }
 
     showModalBottomSheet(
       context: context,
@@ -150,33 +80,34 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
-                    "Edit Todo",
-                    style: TextStyle(
+                  Text(
+                    isEdit ? "Edit Todo" : "Add Todo",
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-              
-                  const SizedBox(height: 16),
-              
-                  TextFormField(
-                    validator: (value) {
-                      if(value == null || value.trim().isEmpty) {
-                        return "Tidak boleh kosong";
-                      }
 
+                  const SizedBox(height: 16),
+
+                  TextFormField(
+                    controller: _addController,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Title tidak boleh kosong";
+                      }
                       return null;
                     },
-                    controller: _addController,
-                    decoration: const InputDecoration(
-                      hintText: "Edit Todo",
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      hintText: isEdit
+                          ? "Edit Todo"
+                          : "Add Todo",
+                      border: const OutlineInputBorder(),
                     ),
                   ),
-              
+
                   const SizedBox(height: 16),
-              
+
                   Row(
                     children: [
                       Expanded(
@@ -188,13 +119,23 @@ class _HomePageState extends State<HomePage> {
                           child: const Text("Cancel"),
                         ),
                       ),
-              
-                      const SizedBox(width: 12),
-              
+
+                      const SizedBox(width: 16),
+
                       Expanded(
                         child: FilledButton(
-                          onPressed: () => _editTodo(todo),
-                          child: const Text("Save"),
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              if (isEdit) {
+                                _editTodo(todo!);
+                              } else {
+                                _addTodo();
+                              }
+                            }
+                          },
+                          child: Text(
+                            isEdit ? "Save" : "Add",
+                          ),
                         ),
                       ),
                     ],
@@ -383,7 +324,7 @@ class _HomePageState extends State<HomePage> {
         slivers: [
           SliverAppBar(
             pinned: true,
-            backgroundColor: Colors.amber,
+            backgroundColor: Theme.of(context).colorScheme.primary,
             title: const Text("My Todo"),
             centerTitle: true,
             actions: [
@@ -483,7 +424,7 @@ class _HomePageState extends State<HomePage> {
                           todo: todo, 
                           onToggle: () => _toggleTodo(todo), 
                           onDelete: () => _showDeleteDialog(todo),
-                          onEdit: () => _showEditBottomSheet(todo),
+                          onEdit: () => _showTodoBottomSheet(todo: todo),
                           onDetail: () {
                             Navigator.push(
                               context,
@@ -502,7 +443,7 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _showAddBottomSheet,
+        onPressed: () => _showTodoBottomSheet(),
         child: const Icon(Icons.add),
       ),
     );
